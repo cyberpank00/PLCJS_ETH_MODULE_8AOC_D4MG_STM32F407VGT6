@@ -44,7 +44,7 @@ extern "C" {
 #define SETTINGS_DEF_IP0            192u
 #define SETTINGS_DEF_IP1            168u
 #define SETTINGS_DEF_IP2            1u
-#define SETTINGS_DEF_IP3            10u
+#define SETTINGS_DEF_IP3            14u   /* 8AOC lab address: .14 (distinct per module type) */
 
 #define SETTINGS_DEF_MASK0          255u
 #define SETTINGS_DEF_MASK1          255u

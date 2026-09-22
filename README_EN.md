@@ -153,7 +153,7 @@ cmake --build --preset Debug
 ```
 
 Identity — `Application/fw_header/fw_header.h`: `FW_PRODUCT_ID=0x504C0806`,
-`FW_HW_REVISION=0x0101`, `FW_VERSION_VALUE=0x0100`.
+`FW_HW_REVISION=0x0101`, `FW_VERSION_VALUE=0x0101`.
 
 ## Flashing
 
@@ -165,7 +165,7 @@ STM32_Programmer_CLI -c port=SWD -w build/Debug/PLCJS_ETH_MODULE_8AOC_D4MG_STM32
 
 Net mode `2` = link-local (factory): `169.254.<mac[4]>.<mac[5]>` /16 from the
 UID, discoverable by MAC (UDP broadcast port `20556`). Static fallback: IP
-`192.168.1.10`, mask `255.255.255.0`, gateway `192.168.1.1`. Modbus TCP port
+`192.168.1.14`, mask `255.255.255.0`, gateway `192.168.1.1`. Modbus TCP port
 `502` (up to 4 clients), unit id `1`.
 
 ## Tools

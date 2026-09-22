@@ -187,7 +187,7 @@ cmake --build --preset Debug
 ```
 
 Идентичность — `Application/fw_header/fw_header.h`: `FW_PRODUCT_ID=0x504C0806`,
-`FW_HW_REVISION=0x0101`, `FW_VERSION_VALUE=0x0100`. Результаты в
+`FW_HW_REVISION=0x0101`, `FW_VERSION_VALUE=0x0101`. Результаты в
 `build/Debug/`; `.bin` — OTA-образ с `fw_header_t` по смещению `0x200`.
 
 ## Прошивка
@@ -202,7 +202,7 @@ STM32_Programmer_CLI -c port=SWD -w build/Debug/PLCJS_ETH_MODULE_8AOC_D4MG_STM32
 |---|---|
 | Сетевой режим (`USE_DHCP`) | `2` = link-local (заводской) |
 | Заводской адрес | `169.254.<mac[4]>.<mac[5]>` /16, из UID |
-| Резервные static-поля | IP `192.168.1.10`, маска `255.255.255.0`, шлюз `192.168.1.1` |
+| Резервные static-поля | IP `192.168.1.14`, маска `255.255.255.0`, шлюз `192.168.1.1` |
 | Modbus TCP порт | `502`, до 4 клиентов одновременно |
 | Modbus unit id | `1` |
 
