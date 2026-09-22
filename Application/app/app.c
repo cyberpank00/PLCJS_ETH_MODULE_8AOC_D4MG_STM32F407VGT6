@@ -54,15 +54,16 @@ uint32_t modbus_app_last_request_tick(void);
 /* Output task: 10 ms service tick — applies pending setpoints to the DAC,
  * runs the comms-loss timer, polls the XTR111 error flags / device liveness
  * at the configured period and performs analog-rail power-cycles. All SPI
- * traffic to the isolated side happens here. */
+ * traffic to the isolated side happens here. A Modbus write raises
+ * AOC_TASK_FLAG_DIRTY and the wait returns early, so the setpoint is applied
+ * immediately instead of on the next tick. */
 static void aoc_task(void* arg)
 {
     (void)arg;
-    uint32_t tick = osKernelGetTickCount();
+    aoc_module_set_task(osThreadGetId());
     for (;;) {
         aoc_module_tick();
-        tick += 10u;
-        osDelayUntil(tick);
+        (void)osThreadFlagsWait(AOC_TASK_FLAG_DIRTY, osFlagsWaitAny, AOC_TASK_TICK_MS);
     }
 }
 

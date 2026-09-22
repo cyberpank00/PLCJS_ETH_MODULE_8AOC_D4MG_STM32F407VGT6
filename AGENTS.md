@@ -114,7 +114,7 @@ Calibration direction differs from the input modules: here the coefficients
 ### Single sources of truth
 - **Module identity** — `Application/fw_header/fw_header.h`:
   `FW_PRODUCT_ID = 0x504C0806`, `FW_HW_REVISION = 0x0101`,
-  `FW_VERSION_VALUE = 0x0101`.
+  `FW_VERSION_VALUE = 0x0102`.
 - **Firmware version over Modbus** — IR120/IR121 derive from `FW_VERSION_VALUE`.
 - **Register map** — the header comment of `modbus_app.h`, mirrored by the
   `MB_*` constants. Keep comment and constants in step.
@@ -128,7 +128,7 @@ Calibration direction differs from the input modules: here the coefficients
 ### Version policy — bump the minor on every change
 
 **Mandatory.** Every change to firmware behaviour ships with `FW_VERSION_VALUE`
-in `fw_header.h` incremented by one minor (`0x0101` → `0x0102`).
+in `fw_header.h` incremented by one minor (`0x0102` → `0x0103`).
 
 - Minor bump: any firmware-only change.
 - Major bump: only together with a `FW_HW_REVISION` major change (MCU pinout).
@@ -158,9 +158,11 @@ Bump checklist: `FW_VERSION_VALUE` in `fw_header.h`, the version rows in
   `tcpip_callback()`.
 - Flash writes and resets requested over Modbus/discovery are deferred to the
   housekeeping loop in `app_run()` via the `*_take_pending_*()` flags.
-- **All SPI traffic to the isolated side stays on the `AOC` task** (10 ms tick).
-  Modbus writes only update RAM and set the dirty flag; `aoc_module_tick()`
-  pushes DAC codes and the ON mask. The rail power-cycle (`osDelay` ≈ 0.7 s)
+- **All SPI traffic to the isolated side stays on the `AOC` task** (10 ms tick,
+  woken early by `AOC_TASK_FLAG_DIRTY`). Modbus writes only update RAM and call
+  `mark_dirty()` (sets the flag + wakes the task); `aoc_module_tick()` pushes
+  only the DAC codes / ON mask that changed (`s_last_code[]`, `s_force_all`
+  after a rail bring-up — keep it set there, the devices were reset). The rail power-cycle (`osDelay` ≈ 0.7 s)
   also runs there, never from the tcpip thread.
 - Any loop blocking longer than the IWDG period must call
   `HAL_IWDG_Refresh(&hiwdg)`.

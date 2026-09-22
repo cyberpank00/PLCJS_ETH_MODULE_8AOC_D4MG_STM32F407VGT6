@@ -66,9 +66,23 @@ static uint8_t  s_dead_polls         = 0u;
 static uint32_t s_last_poll_tick     = 0u;
 static uint32_t s_last_cycle_tick    = 0u;
 static uint8_t  s_on_mask            = 0u;
+static uint16_t s_last_code[AOC_CHANNEL_COUNT];   /* last code written per channel */
+static bool     s_force_all          = true;      /* rewrite everything (after bring-up) */
+
+/* The AOC task, woken immediately by mark_dirty() so a Modbus write reaches
+ * the DAC within ~0.2 ms instead of waiting for the next 10 ms tick. */
+static osThreadId_t s_task           = NULL;
 
 /* Loss timer source (modbus_app.c). */
 uint32_t modbus_app_last_request_tick(void);
+
+static void mark_dirty(void)
+{
+    s_dirty = true;
+    if (s_task != NULL) {
+        (void)osThreadFlagsSet(s_task, AOC_TASK_FLAG_DIRTY);
+    }
+}
 
 /* LED blink state. */
 static uint16_t s_blink_timer;
@@ -127,6 +141,7 @@ static void analog_bringup(void)
     s_mcp_ok = mcp23s17_init();     /* all channels OFF */
     s_on_mask    = 0u;
     s_dead_polls = 0u;
+    s_force_all  = true;            /* devices were reset: rewrite every code */
     s_dirty      = true;            /* re-apply setpoints and ON mask */
 }
 
@@ -159,7 +174,8 @@ static uint16_t ma_to_code(uint8_t ch, float i_set_ma)
     return (uint16_t)lroundf(code);
 }
 
-/* Compute and push every channel's DAC code and the ON mask. */
+/* Compute every channel's DAC code and the ON mask; push only what changed
+ * since the last write (everything after a rail bring-up). */
 static void apply_outputs(void)
 {
     uint8_t on_mask = 0u;
@@ -189,13 +205,18 @@ static void apply_outputs(void)
 
     if (s_dac_ok) {
         for (uint8_t ch = 0; ch < AOC_CHANNEL_COUNT; ch++) {
-            dac80508_set_code(ch, s_status[ch].dac_code);
+            const uint16_t code = s_status[ch].dac_code;
+            if (s_force_all || code != s_last_code[ch]) {
+                dac80508_set_code(ch, code);
+                s_last_code[ch] = code;
+            }
         }
     }
-    if (s_mcp_ok) {
+    if (s_mcp_ok && (s_force_all || on_mask != s_on_mask)) {
         mcp23s17_set_on_mask(on_mask);
     }
-    s_on_mask = on_mask;
+    s_on_mask   = on_mask;
+    s_force_all = false;
 }
 
 /* ---------------------------------------------------------------------------
@@ -246,10 +267,15 @@ void aoc_module_init(void)
     s_dirty = false;
 }
 
+void aoc_module_set_task(osThreadId_t task)
+{
+    s_task = task;
+}
+
 void aoc_module_apply_config(void)
 {
     load_settings();
-    s_dirty = true;
+    mark_dirty();
 }
 
 void aoc_module_tick(void)
@@ -315,7 +341,7 @@ void aoc_module_set_setpoint_ua(uint8_t ch, uint16_t ua)
     if (ua > SETTINGS_SCALE_MAX_UA) { ua = SETTINGS_SCALE_MAX_UA; }
     s_setpoint_ua[ch] = ua;
     settings_get()->ch_setpoint_ua[ch] = ua;   /* persisted only by SAVE */
-    s_dirty = true;
+    mark_dirty();
 }
 
 void aoc_module_set_setpoint_i16(uint8_t ch, int16_t v)

@@ -153,7 +153,7 @@ cmake --build --preset Debug
 ```
 
 Identity — `Application/fw_header/fw_header.h`: `FW_PRODUCT_ID=0x504C0806`,
-`FW_HW_REVISION=0x0101`, `FW_VERSION_VALUE=0x0101`.
+`FW_HW_REVISION=0x0101`, `FW_VERSION_VALUE=0x0102`.
 
 ## Flashing
 

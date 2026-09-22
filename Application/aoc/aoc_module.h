@@ -23,8 +23,11 @@
   *    - comms loss: no valid Modbus request from any client for the configured
   *      timeout applies each channel's loss mode until a request arrives.
   *
-  *  All SPI traffic stays on the AOC task: Modbus writes only update RAM and
-  *  raise a "dirty" flag that the task services within one tick (10 ms).
+  *  All SPI traffic stays on the AOC task: Modbus writes only update RAM,
+  *  raise a "dirty" flag and wake the task (thread flag), so a new setpoint
+  *  reaches the DAC in well under a millisecond; the task otherwise runs on a
+  *  10 ms tick for the loss timer and EF polling. Only DAC codes / the ON mask
+  *  that actually changed are written to the bus.
   ******************************************************************************
   */
 #ifndef APPLICATION_AOC_MODULE_H
@@ -32,12 +35,17 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "cmsis_os2.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define AOC_CHANNEL_COUNT           8u
+
+/* Thread flag raised on the AOC task when outputs need re-applying. */
+#define AOC_TASK_FLAG_DIRTY         0x01u
+#define AOC_TASK_TICK_MS            10u
 
 /* Fault codes reported in aoc_channel_status_t.fault_code. */
 #define AOC_FAULT_NONE              0u
@@ -65,6 +73,9 @@ void aoc_module_init(void);
 
 /** Re-read settings (scales, enables, loss config, nominals) and re-apply. */
 void aoc_module_apply_config(void);
+
+/** Register the task to be woken by AOC_TASK_FLAG_DIRTY (call from the task). */
+void aoc_module_set_task(osThreadId_t task);
 
 /** Periodic service (call every 10 ms from the AOC task): applies pending
  *  setpoints, runs the comms-loss timer, polls EF / liveness at poll_ms,
