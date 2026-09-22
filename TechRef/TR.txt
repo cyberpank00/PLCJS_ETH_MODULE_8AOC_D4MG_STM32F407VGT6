@@ -1,0 +1,42 @@
+Появился проект плат для версии PLCJS_ETH_MODULE_8AOC_D4MG_STM32F407VGT6.
+Это версия модуля вывода 0-20mA (NAMUR) с изолированным питанием токовой петли (подключение  source). Питание петли 24VDC
+Модуль наследует все сетевые функции других модулей в линейке. Аналоговый тракт построен на одном ЦАП DAC80508ZRTET. В качестве силовых выходных преобразователей U/I выступают восемь XTR111AIDGQR. Для управления и чтения статусов всех XTR111AIDGQR имеется микросхема расширитель GPIO MCP23S17T-E/SS опрашиваемая по SPI. Цифровую изоляцию реализуют микросхемы CA-IS3741LB и CA-IS3722LS. Изоляцию по питанию - URB2424S-6WR3 , ножка управления подключена. Так же есть светодиоды статусов каналов.
+Распиновка контроллера:
+CLK - PA5,
+MISO - PA6,
+MOSI - PB5,
+DAC_CS - PA12,
+MCP_CS - PD8,
+PVD_CTRL - PB7 (выключение DC/DC URB2424S-6WR3),
+AO0_STAT - PB15,
+AO1_STAT - PB14,
+AO2_STAT - PB10,
+AO3_STAT - PE15,
+AO4_STAT - PE14,
+AO5_STAT - PE13,
+AO6_STAT - PE12,
+AO7_STAT - PE11,
+FACT_RES - PE10,
+STAT_LED - PE9.
+
+Распиновка MCP23S17T-E/SS (обмен сигналами с XTR111AIDGQR) :
+GPA0 - AO3_EF
+GPA1 - AO3_ON
+GPA2 - AO5_EF
+GPA3 - AO5_ON
+GPA4 - AO6_EF
+GPA5 - AO6_ON
+GPA6 - AO7_EF
+GPA7 - AO7_ON
+
+GPB0 - AO4_ON
+GPB1 - AO4_EF
+GPB2 - AO2_ON
+GPB3 - AO2_EF
+GPB4 - AO1_ON
+GPB5 - AO1_EF
+GPB6 - AO0_ON
+GPB7 - AO0_EF
+
+Репо будет тут: https://github.com/cyberpank00/PLCJS_ETH_MODULE_8AOC_D4MG_STM32F407VGT6.git
+

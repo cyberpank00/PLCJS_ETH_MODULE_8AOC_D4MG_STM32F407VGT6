@@ -1,0 +1,11 @@
+# Build output
+build/
+
+# IDE / editor
+.vscode/
+.cache/
+
+# Python
+__pycache__/
+*.pyc
+
