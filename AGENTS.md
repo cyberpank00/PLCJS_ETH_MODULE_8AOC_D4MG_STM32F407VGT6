@@ -139,6 +139,10 @@ in `fw_header.h` incremented by one minor (`0x0104` → `0x0105`).
 Bump checklist: `FW_VERSION_VALUE` in `fw_header.h`, the version rows in
 `README.md` and `README_EN.md`.
 
+Changelog: every version bump also adds an entry (`DATE -- reason`, appended at the end)
+to the shared `CHANGELOG.md` / `CHANGELOG.txt` in the bootloader repo
+(`BOOTLOADER_PLCJS_ETH_MODULE_STM32F407VGT6`) - one file for all repos.
+
 ### Persistence and Flash sectors
 
 | Sector | Address | Content |
